@@ -1,16 +1,16 @@
 from hash import HashMap
+import csv
 
+
+def csvReader():
+    with open("DistanceTable.csv") as dt:
+        reader = csv.reader(dt, delimiter=",", quotechar='"')
+        # next(reader, None)  # skip the headers
+        data_read = [row for row in reader]
+    return data_read[20]
 
 
 if __name__ == '__main__':
     h = HashMap()
-    h.add('Bob', '567-888')
-    h.add('Ming', '293-6753')
-    h.add('Mike', '567-2188')
-    h.print()
-    h.delete('Bob')
-    h.print()
 
-
-
-
+    print(csvReader())
