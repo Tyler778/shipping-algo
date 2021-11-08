@@ -7,5 +7,4 @@ from initializer import loader
 if __name__ == '__main__':
     h = HashMap()
     loader = loader()
-
-    print(loader.packageReader())
+    loader.packageReader()

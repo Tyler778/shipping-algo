@@ -12,4 +12,13 @@ class loader:
         with open("PackageTable.csv") as dt:
             reader = csv.reader(dt, delimiter=",", quotechar='"')
             data_read = [row for row in reader]
-        return data_read
+        x = 1
+        while x < 41:
+            data_read[x].pop()
+            data_read[x].pop()
+            data_read[x].pop()
+            data_read[x].pop()
+            data_read[x].pop()
+            data_read[x].pop()
+            print(data_read[x])
+            x += 1
