@@ -43,7 +43,7 @@ class HashMap:
                 return True
 
     def print(self):
-        print('---PHONEBOOK---')
+
         for item in self.map:
             if item is not None:
-                print(str(item))
+                print(str(item) + '\n')

@@ -1,5 +1,4 @@
 import csv
-
 class loader:
 
     def distanceReader(self):
