@@ -52,14 +52,18 @@ def distanceLookup(index1, index2):
     return distance
 
 def minDistanceFrom(fromAddress, truckPackages):
-    minDistance = 100
+    holdDistance = 100
+    nearestAddress = None
+    pID = None
     for i in truckPackages:
         tempDistance = float(distanceBetween(fromAddress, i.getAddress()))
-        if tempDistance < minDistance:
-            minDistance = tempDistance
+        if tempDistance < holdDistance:
+            holdDistance = tempDistance
+            nearestAddress = i.getAddress()
+            pID = i.getId()
 
 
-    return minDistance
+    return nearestAddress, pID
 
 def truckLoadPackages():
     t1 = [1, 2, 4, 5, 7, 10, 11, 12, 17, 23, 24, 27, 29, 33, 35, 40]
@@ -90,6 +94,28 @@ def truckLoadPackages():
         truckThree.load(cht.search(str(i)))
     return len(t1), len(t2), len(t3)
 
+def truckDeliverPackages(truck):
+    address = '4001 South 700 East'
+    prevAddress = '4001 South 700 East'
+    remPackages = truck.getAllPackages()
+    sum = 0.0
+    while truck.getCountOfPackages() > 0:
+
+        addressID = minDistanceFrom(address, remPackages)
+        address = addressID[0]
+        id = addressID[1]
+        try:
+            remPackages.remove(cht.search(id))
+        except Exception as e:
+            print('That was my final package\n')
+            print('I traveled ' + str(sum) + ' miles in total.\n \n')
+            
+            break
+        print('Delivered ' + id + ' to ' + address)
+        sum = float(distanceBetween(prevAddress, address)) + sum
+        prevAddress = address
+        print('I have traveled: ' + str(sum) + ' miles now!\n')
+
 
 addressList = addressReader()
 distanceList = distanceReader()
@@ -101,6 +127,5 @@ if __name__ == '__main__':
     addressReader()
     truckLoadPackages()
 
-    truckOne.getCountOfPackages()
-    truckTwo.getCountOfPackages()
-    truckThree.getCountOfPackages()
+    truckDeliverPackages(truckOne)
+    truckDeliverPackages(truckTwo)

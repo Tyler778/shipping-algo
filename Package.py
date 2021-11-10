@@ -7,6 +7,7 @@ class Package:
         self.zip = zip
         self.deliveryTime = deliveryTime
         self.weight = weight
+        self.status = 'Loaded'
     def getId(self):
         return self.id
 
@@ -27,3 +28,9 @@ class Package:
 
     def getWeight(self):
         return self.weight
+
+    def getStatus(self):
+        return self.status
+
+    def setStatus(self, stat):
+        self.status = stat
