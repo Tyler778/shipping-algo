@@ -9,18 +9,21 @@ cht = ChainingHashTable()
 truckPkgs = []
 
 truckSpeed = 18
-startTime = datetime.datetime(100, 1, 1, 9, 17, 40)
+startTime = datetime.datetime(100, 1, 1, 8, 0, 0)
 reloadTime = None
 
-def deliveryTime(miles):
+def deliveryTime(miles, reloadUse):
+    global reloadTime
     global startTime
+    if reloadUse == True:
+        startTime = reloadTime
     f = (miles/truckSpeed)
     h = int(f)
     m = int((f - h) * 60)
     s = int((((f - h) * 60) - m) * 60)
     add = datetime.timedelta(hours=h, minutes=m, seconds=s)
     current = startTime + add
-    return current.time()
+    return current
 
 def distanceReader():
     with open("DistanceTable.csv") as dt:
@@ -107,7 +110,7 @@ def truckLoadPackages():
     #31 delivered to same spot
     #22 nearby delivery
     #6, 25, 31  --- 10:30AM
-    #9 new location is 410 S State St
+    #9 new location is 410 S State St old location is 300 State St
     t3 = [6, 25, 26, 28, 31, 32, 9, 22, 5, 10, 11, 12, 17, 23, 24]
 
     for i in t1:
@@ -119,35 +122,55 @@ def truckLoadPackages():
     return len(t1), len(t2), len(t3)
 
 def truckDeliverPackages(truck, leaveOut, newStart):
-    global startTime
-    address = addressList[0]
-    prevAddress = address
+    global reloadTime
+    hubAddress = addressList[0]
+    prevAddress = hubAddress
     remPackages = truck.getAllPackages()
     sum = 0.0
     while truck.getCountOfPackages() > 0:
-        truck.removePackage()
-
-        addressID = minDistanceFrom(address, remPackages)
+        addressID = minDistanceFrom(prevAddress, remPackages)
         address = addressID[0]
         id = addressID[1]
-        try:
-            remPackages.remove(cht.search(id))
-        except Exception as e:
-            homeDist = distanceBetween(prevAddress, '4001 South 700 East')
-            sum = float(homeDist) + sum
-            rounded = round(float(homeDist), 1)
-            print('That was my final package')
-            print('The time is: ' + str(deliveryTime(sum)) + ' and I am at the Hub.')
-            print('I traveled ' + str(sum) + ' miles in total to deliver my packages.\n')
-            print('It took me an extra ' + str(rounded) + ' miles to get home.  ' + str(sum) + ' miles in total.\n\n')
+        remPackages.remove(cht.search(id))
 
-            break
+        truck.removePackageCount()
+
         sum = float(distanceBetween(prevAddress, address)) + sum
+        truck.setMilesTraveled(sum)
         prevAddress = address
         rounded = round(sum, 1)
-        print('Delivery Time: ' + str(deliveryTime(sum)))
+        tenTwenty = datetime.datetime(100, 1, 1, 10, 19, 59, 0)
+        if deliveryTime(sum, newStart).time() >= tenTwenty.time() and cht.search('9').getAddress() == '300 State St':
+            cht.search('9').setAddress('410 S State St')
+            print('It is past 10:20 and package 9 is now updated.')
+        print('Delivery Time: ' + str(deliveryTime(sum, newStart).time()))
         print('Delivered ' + id + ' to ' + address)
         print('I have traveled: ' + str(rounded) + ' miles now!\n')
+
+
+        if (leaveOut == True) and truck.getCountOfPackages() == 0:
+            print('That was my final package and I am staying out.')
+            print('I have traveled ' + str(round(truck.getMilesTraveled(), 1)) + ' miles.')
+            print('\n')
+        elif (leaveOut != True) and truck.getCountOfPackages() == 0:
+            homeDist = distanceBetween(prevAddress, hubAddress)
+            truck.setMilesTraveled(float(homeDist) + sum)
+            reloadTime = deliveryTime(truck.getMilesTraveled(), newStart)
+            print("I've returned to the hub to pickup more packages.")
+            print('After returning to the hub I have traveled ' + str(round(truck.getMilesTraveled(), 1)) + ' miles and the time is currently ' + str(reloadTime.time()) + '.')
+            print('\n')
+
+
+
+def grabTotalMileage():
+    sum1 = round(truckOne.getMilesTraveled(), 1)
+    sum2 = round(truckTwo.getMilesTraveled(), 1)
+    sum3 = round(truckThree.getMilesTraveled(), 1)
+    total = sum1 + sum2 + sum3
+    print('Truck 1 traveled ' + str(sum1) + ' miles and delivered 9 packages.')
+    print('Truck 2 traveled ' + str(sum2) + ' miles and delivered 16 packages.')
+    print('Truck 3 traveled ' + str(sum3) + ' miles and delivered 15 packages.')
+    print('Total mileage driven was ' + str(total) + ' miles.')
 
 
 addressList = addressReader()
@@ -164,5 +187,6 @@ if __name__ == '__main__':
     truckDeliverPackages(truckTwo, True, False)
     truckDeliverPackages(truckThree, True, True)
 
+    grabTotalMileage()
     #ValueError: '5383 South 900 East #104' is not in list
     #print(addressList)

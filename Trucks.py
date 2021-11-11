@@ -2,6 +2,7 @@ from Package import Package
 #from main import addressList
 import datetime
 
+
 class truck:
     def __init__(self):
         self.packages = []
@@ -54,9 +55,6 @@ class truck:
         self.milesTraveled = miles
     def getMilesTraveled(self):
         return self.milesTraveled
-    def setMilesTraveledHub(self, miles):
-        self.milesTraveledHub = miles
-    def getMilesTraveledHub(self):
-        return self.milesTraveledHub
-    def removePackage(self):
+    def removePackageCount(self):
         self.count = self.count - 1
+
