@@ -13,6 +13,8 @@ class Package:
 
     def getAddress(self):
         return self.address
+    def setAddress(self, address):
+        self.address = address
 
     def getCity(self):
         return self.city
