@@ -1,5 +1,5 @@
 import csv
-from WGUhash import ChainingHashTable
+from hash import ChainingHashTable
 from Package import Package
 from Trucks import truck
 import datetime
