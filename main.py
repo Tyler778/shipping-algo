@@ -1,12 +1,11 @@
 import csv
-from hash import ChainingHashTable
+from hash import HashTable
 from Package import Package
 from Trucks import truck
 import datetime
+import time
 
-cht = ChainingHashTable()
-
-truckPkgs = []
+cht = HashTable()
 
 truckSpeed = 18
 startTime = datetime.datetime(100, 1, 1, 8, 0, 0)
@@ -52,8 +51,6 @@ def packageReader():
         sliced = data_read[x][0:7]
         pkg = Package(sliced[0],sliced[1],sliced[2],sliced[3],sliced[4],sliced[5],sliced[6])
         cht.insert(pkg.getId(), pkg)
-        if int(pkg.getId()) % 5 == 4:
-            truckPkgs.append(pkg)
         x += 1
 
 def distanceBetween(address1, address2):
@@ -114,11 +111,25 @@ def truckLoadPackages():
     t3 = [6, 25, 26, 28, 31, 32, 9, 22, 5, 10, 11, 12, 17, 23, 24]
 
     for i in t1:
-        truckOne.load(cht.search(str(i)))
+        pkg = cht.search(str(i))
+        truckOne.load(pkg)
+        pkg.setEnRoute()
+        time.sleep(.05)
+        print('Truck 1 Loaded with ' + pkg.getId())
     for i in t2:
-        truckTwo.load(cht.search(str(i)))
+        pkg = cht.search(str(i))
+        truckTwo.load(pkg)
+        pkg.setEnRoute()
+        time.sleep(.05)
+        print('Truck 2 Loaded with ' + pkg.getId())
     for i in t3:
-        truckThree.load(cht.search(str(i)))
+        pkg = cht.search(str(i))
+        truckThree.load(pkg)
+        pkg.setEnRoute()
+        time.sleep(.05)
+        print('Truck 3 Loaded with ' + pkg.getId())
+    time.sleep(1)
+    print('All trucks loaded..')
     return len(t1), len(t2), len(t3)
 
 def truckDeliverPackages(truck, leaveOut, newStart):
@@ -132,7 +143,7 @@ def truckDeliverPackages(truck, leaveOut, newStart):
         address = addressID[0]
         id = addressID[1]
         remPackages.remove(cht.search(id))
-
+        cht.search(id).setDelivered()
         truck.removePackageCount()
 
         sum = float(distanceBetween(prevAddress, address)) + sum
@@ -140,27 +151,27 @@ def truckDeliverPackages(truck, leaveOut, newStart):
         prevAddress = address
         rounded = round(sum, 1)
         tenTwenty = datetime.datetime(100, 1, 1, 10, 19, 59, 0)
+        cht.search(id).setDeliveredTime(deliveryTime(sum, newStart).time())
         if deliveryTime(sum, newStart).time() >= tenTwenty.time() and cht.search('9').getAddress() == '300 State St':
             cht.search('9').setAddress('410 S State St')
-            print('It is past 10:20 and package 9 is now updated.')
-        print('Delivery Time: ' + str(deliveryTime(sum, newStart).time()))
-        print('Delivered ' + id + ' to ' + address)
-        print('I have traveled: ' + str(rounded) + ' miles now!\n')
+            cht.search('9').setZip('84111')
+        #     print('It is past 10:20 and package 9 is now updated.')
+        # print('Delivery Time: ' + str(deliveryTime(sum, newStart).time()))
+        # print('Delivered ' + id + ' to ' + address)
+        # print('I have traveled: ' + str(rounded) + ' miles now!\n')
 
 
-        if (leaveOut == True) and truck.getCountOfPackages() == 0:
-            print('That was my final package and I am staying out.')
-            print('I have traveled ' + str(round(truck.getMilesTraveled(), 1)) + ' miles.')
-            print('\n')
+        # if (leaveOut == True) and truck.getCountOfPackages() == 0:
+        #     print('That was my final package and I am staying out.')
+        #     print('I have traveled ' + str(round(truck.getMilesTraveled(), 1)) + ' miles.')
+        #     print('\n')
         elif (leaveOut != True) and truck.getCountOfPackages() == 0:
             homeDist = distanceBetween(prevAddress, hubAddress)
             truck.setMilesTraveled(float(homeDist) + sum)
             reloadTime = deliveryTime(truck.getMilesTraveled(), newStart)
-            print("I've returned to the hub to pickup more packages.")
-            print('After returning to the hub I have traveled ' + str(round(truck.getMilesTraveled(), 1)) + ' miles and the time is currently ' + str(reloadTime.time()) + '.')
-            print('\n')
-
-
+            # print("I've returned to the hub to pickup more packages.")
+            # print('After returning to the hub I have traveled ' + str(round(truck.getMilesTraveled(), 1)) + ' miles and the time is currently ' + str(reloadTime.time()) + '.')
+            # print('\n')
 
 def grabTotalMileage():
     sum1 = round(truckOne.getMilesTraveled(), 1)
@@ -168,9 +179,49 @@ def grabTotalMileage():
     sum3 = round(truckThree.getMilesTraveled(), 1)
     total = sum1 + sum2 + sum3
     print('Truck 1 traveled ' + str(sum1) + ' miles and delivered 9 packages.')
+    time.sleep(.5)
     print('Truck 2 traveled ' + str(sum2) + ' miles and delivered 16 packages.')
+    time.sleep(.5)
     print('Truck 3 traveled ' + str(sum3) + ' miles and delivered 15 packages.')
+    time.sleep(.5)
     print('Total mileage driven was ' + str(total) + ' miles.')
+    time.sleep(4)
+
+def deliver():
+    try:
+        truckDeliverPackages(truckOne, False, False)
+        truckDeliverPackages(truckTwo, True, False)
+        truckDeliverPackages(truckThree, True, True)
+        time.sleep(1)
+        print('Successfully delivered packages.')
+    except Exception as e:
+        print(e)
+        print('There was a problem in delivery.')
+
+def displayByTime(timeString):
+    fixed_time = datetime.datetime.strptime(timeString, '%I:%M:%S').time()
+    tenTwenty = datetime.datetime(100, 1, 1, 10, 19, 59, 0).time()
+    if fixed_time > tenTwenty:
+        cht.search('9').setAddress('410 S State St')
+        cht.search('9').setZip('84111')
+    else:
+        cht.search('9').setAddress('300 State St')
+        cht.search('9').setZip('84103')
+
+
+    print('ID-------Address-------------------------------City---------------------------------------Zip---------Required-------------------------Weight---------------------------------------Status-------------------')
+    for i in Package._registry:
+        status = 'Not Delivered Yet'
+        if fixed_time > i.getDeliveredTime():
+            status = 'Delivered'
+
+        print((str(i.getId()) + '    ' + str(i.getAddress()) + '\t' + str(i.getCity()) + '\t' + str(i.getZip()) + '       ' + str(i.getDeliveryTime()) + '\t' + str(i.getWeight()) + '\t' + status).expandtabs(45))
+        print('-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
+        #line = str(i.getId()) + '\t' + str(i.getAddress()) + '\t' + str(i.getCity()) + '\t' + str(i.getZip()) + '\t' + str(i.getDeliveryTime()) + '\t' + str(i.getWeight())
+
+        #print(line)
+
+
 
 
 addressList = addressReader()
@@ -178,15 +229,35 @@ distanceList = distanceReader()
 truckOne = truck()
 truckTwo = truck()
 truckThree = truck()
+
 if __name__ == '__main__':
-    print('\n')
     packageReader()
     addressReader()
-    truckLoadPackages()
-    truckDeliverPackages(truckOne, False, False)
-    truckDeliverPackages(truckTwo, True, False)
-    truckDeliverPackages(truckThree, True, True)
+    # truckLoadPackages()
+    # deliver()
+    # displayByTime('9:18:00')
 
-    grabTotalMileage()
-    #ValueError: '5383 South 900 East #104' is not in list
-    #print(addressList)
+    isExit = True
+    while (isExit):
+        time.sleep(1)
+        print("\nOptions:")
+        print("1. Load Truck With Packages")
+        print("2. Deliver Packages")
+        print('3. Total Mileage Info')
+        print('4. Time Search')
+        print('5. Close')
+        option = input("Option 1 must be done before 2.  3 and 4 can then be done.  5 to close program: ")
+        if option == "1":
+            truckLoadPackages()
+        elif option == "2":
+            deliver()
+        elif option == "3":
+            grabTotalMileage()
+        elif option == "4":
+            t = input("Type any time to view list of package data at that time.  (Example: 9:30:00)")
+            displayByTime(str(t))
+
+        elif option == "5":
+            isExit = False
+        else:
+            print("Wrong option, please try again!")

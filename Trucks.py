@@ -9,10 +9,7 @@ class truck:
         self.addressVisited = []
         self.allAddresses = []
         self.count = 0
-        self.finishTime = None
-        self.returnHubTime = None
         self.milesTraveled = None
-        self.milesTraveledHub = None
 
     def load(self, package):
         self.allAddresses.append(package.getAddress())
@@ -41,12 +38,6 @@ class truck:
         return self.count
     def getStops(self):
         print(len(self.addressVisited))
-
-    def setFinishTime(self, ft):
-        self.finishTime = ft
-
-    def getFinishTime(self):
-        return self.finishTime
     def setReturnHubTime(self, rht):
         self.returnHubTime = rht
     def getReturnHubTime(self):

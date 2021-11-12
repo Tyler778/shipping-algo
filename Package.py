@@ -1,5 +1,10 @@
+
+
 class Package:
+    _registry = []
+
     def __init__(self, id, address, city, state, zip, deliveryTime, weight):
+        self._registry.append(self)
         self.id = id
         self.address = address
         self.city = city
@@ -7,7 +12,8 @@ class Package:
         self.zip = zip
         self.deliveryTime = deliveryTime
         self.weight = weight
-        self.status = 'Loaded'
+        self.status = 'At The Hub'
+        self.deliveredTime = None
     def getId(self):
         return self.id
 
@@ -24,6 +30,8 @@ class Package:
 
     def getZip(self):
         return self.zip
+    def setZip(self, zip):
+        self.zip = zip
 
     def getDeliveryTime(self):
         return self.deliveryTime
@@ -34,5 +42,12 @@ class Package:
     def getStatus(self):
         return self.status
 
-    def setStatus(self, stat):
-        self.status = stat
+    def setEnRoute(self):
+        self.status = 'En Route'
+    def setDelivered(self):
+        self.status = 'Delivered'
+
+    def setDeliveredTime(self, time):
+        self.deliveredTime = time
+    def getDeliveredTime(self):
+        return self.deliveredTime
