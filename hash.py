@@ -1,6 +1,8 @@
 
+
+#Hash table with an initial capacity of 35
 class HashTable:
-    def __init__(self, initial_capacity=25):
+    def __init__(self, initial_capacity=35):
         self.table = []
         for i in range(initial_capacity):
             self.table.append([])
@@ -24,9 +26,7 @@ class HashTable:
 
     def search(self, key):
         bucket_list = self.table[self.hash_function(key)]
-
         for kv in bucket_list:
-
             if kv[0] == key:
                 return kv[1]
         return None

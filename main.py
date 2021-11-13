@@ -1,3 +1,9 @@
+#       Tyler Steven Quante
+#       Student ID: #001041325
+#       DSAII Nearest Neighbor Algorithm
+#       Time Complexity of O(n^2)
+#       Space Complexity of O(n^2)
+#
 import csv
 from hash import HashTable
 from Package import Package
@@ -5,15 +11,17 @@ from Trucks import truck
 import datetime
 import time
 
-cht = HashTable()
-
-truckSpeed = 18
-startTime = datetime.datetime(100, 1, 1, 8, 0, 0)
-reloadTime = None
-
+# function deliveryTime() accepts two parameters that take the sum of miles traveled and a boolean as reloadUse
+# With this information we can calculate the hours, minutes, and seconds based on the truck speed.  Depending on
+# if reloadUse was True or False, we use either 8:00AM or the reloadTime then increment it by the time spent traveling
+# miles passed to the function.
+#
+# O(1) time complexity
+# O(1) space complexity
 def deliveryTime(miles, reloadUse):
     global reloadTime
     global startTime
+    truckSpeed = 18
     if reloadUse == True:
         startTime = reloadTime
     f = (miles/truckSpeed)
@@ -24,6 +32,11 @@ def deliveryTime(miles, reloadUse):
     current = startTime + add
     return current
 
+
+# Read through the DistanceTable.csv, format it, and return the data.
+#
+# O(n) time complexity
+# O(n) space complexity
 def distanceReader():
     with open("DistanceTable.csv") as dt:
         reader = csv.reader(dt, delimiter=",", quotechar='"')
@@ -31,6 +44,10 @@ def distanceReader():
         data_read.pop(0)
     return data_read
 
+# Read through the AddressTable.csv, format it, and input it into the addressList[]
+#
+# O(n) time complexity
+# O(n) space complexity
 def addressReader():
     with open("AddressTable.csv") as dt:
         reader = csv.reader(dt, delimiter=",", quotechar='"')
@@ -42,24 +59,37 @@ def addressReader():
         addressList = [i[0] for i in listHold]
     return addressList
 
+# Read through the PackageTable.csv, slice it, create an instance of the Package class and insert
+# it into the Hash Table
+#
+# O(n) time complexity
+# O(n) space complexity
 def packageReader():
     with open("PackageTable.csv") as dt:
         reader = csv.reader(dt, delimiter=",", quotechar='"')
         data_read = [row for row in reader]
     x = 1
-    while x < 41:
+    while len(data_read) > x:
         sliced = data_read[x][0:7]
         pkg = Package(sliced[0],sliced[1],sliced[2],sliced[3],sliced[4],sliced[5],sliced[6])
         cht.insert(pkg.getId(), pkg)
         x += 1
 
-#function to take two addresses and find distance between both using distanceList created by address reader
+# Given two addresses, find the indices of them in the addressList and then return a call to distanceLookup
+#
+# O(1) time complexity
+# O(1) space complexity
 def distanceBetween(address1, address2):
     index1 = addressList.index(address1)
     index2 = addressList.index(address2)
 
     return distanceLookup(index1, index2)
 
+# Given two indices generated in distanceBetween(), access the distanceList[][] and attempt to access the
+# available saved distance at the indices.
+#
+# O(1) time complexity
+# O(1) space complexity
 def distanceLookup(index1, index2):
     try:
         distance = distanceList[index1][index2]
@@ -67,10 +97,14 @@ def distanceLookup(index1, index2):
         distance = distanceList[index2][index1]
     return distance
 
+# Given an address and a list of packages, return the nearestAddress and package ID of the nearest address
+# by looping through package list and calling distanceBetween on each package in the list compared to the
+# address used to call the function.
+#
+# O(n) time complexity
+# O(n) space complexity
 def minDistanceFrom(fromAddress, truckPackages):
     holdDistance = 100
-    nearestAddress = None
-    pID = None
     for i in truckPackages:
         tempDistance = float(distanceBetween(fromAddress, i.getAddress()))
         if tempDistance < holdDistance:
@@ -81,36 +115,17 @@ def minDistanceFrom(fromAddress, truckPackages):
 
     return nearestAddress, pID
 
+
+# Accepts no arguments, truckLoadPackages() is to be called once to mount each package in the corresponding
+# list to the truck by looping through the list, searching the hash table for the package, and calling a method
+# load() in truck to add that package to the truck.
+#
+# O(n) time complexity
+# O(n) space complexity
 def truckLoadPackages():
-    #leftover packages not on t2 or t3
-    #4 and 40 same spot
-    #2 and 33 same spot
-    #7 and 29 same spot
-    #27 and 35 same spot
-    #1, 29, 40    ---  10:30AM
-    #5, 10, 11, 12, 17, 23, 24 possible easy moves
     t1 = [1, 2, 4, 7, 27, 29, 33, 35, 40]
-    #must be on t2 OR delivered to same spot
-    #3 18 36 38 MUST be t2
-    #13 14 15 16 19 20 MUST be on same truck
-    #39 same spot 13
-    #37 same spot 38
-    #34 same spot 15, 16
-    #21 same spot 2
-    #30 AND 8 nearby other delivery locations
-    #15    ---  9:00AM
-    #37, 13, 14, 16, 20, 34, 30   ---  10:30AM
-    #30, 8possible easy moves
     t2 = [3, 18, 36, 38, 13, 14, 15, 16, 19, 20, 39, 37, 34, 21, 30, 8]
-
-    #all delayed until 9:05 OR delivered to same spot
-    #26 delivered to same spot
-    #31 delivered to same spot
-    #22 nearby delivery
-    #6, 25, 31  --- 10:30AM
-    #9 new location is 410 S State St old location is 300 State St
     t3 = [6, 25, 26, 28, 31, 32, 9, 22, 5, 10, 11, 12, 17, 23, 24]
-
     for i in t1:
         pkg = cht.search(str(i))
         truckOne.load(pkg)
@@ -133,48 +148,61 @@ def truckLoadPackages():
     print('All trucks loaded..')
     return len(t1), len(t2), len(t3)
 
-
+#       ----Nearest Known Neighbor Greedy Algorithm----
+#
+# With arguments as truck object, leaveOut boolean, and newStart Boolean, we go through each package
+# within the truck, deliver it, update the package as delivered with time, and increment the sum of mileage
+#
+# O(n^2) time complexity
+# O(n^2) space complexity
 def truckDeliverPackages(truck, leaveOut, newStart):
     global reloadTime
     hubAddress = addressList[0]
     prevAddress = hubAddress
     remPackages = truck.getAllPackages()
     sum = 0.0
+    tenTwenty = datetime.datetime(100, 1, 1, 10, 19, 59, 0)
     while truck.getCountOfPackages() > 0:
+        # function called minDistanceFrom to give address and package ID
+        # O(n) time complexity
         addressID = minDistanceFrom(prevAddress, remPackages)
         address = addressID[0]
         id = addressID[1]
-        remPackages.remove(cht.search(id))
-        cht.search(id).setDelivered()
+
+        # hash table lookup function called to obtain package object of correlating ID and remove it
+        # from list of available packages and set it delivered
+        # O(1) time complexity
+        pkg = cht.search(id)
+        remPackages.remove(pkg)
+        pkg.setDelivered()
+
+        # decrement truck package count for iteration through while loop
         truck.removePackageCount()
 
+        # increment sum with distanceBetween the prevAddress and the new address traveled to
+        # set the truck miles traveled with sum
+        # prevAddress now points to the new address(after calculating the distance between)
+        # set the package delivery time
         sum = float(distanceBetween(prevAddress, address)) + sum
         truck.setMilesTraveled(sum)
         prevAddress = address
-        rounded = round(sum, 1)
-        tenTwenty = datetime.datetime(100, 1, 1, 10, 19, 59, 0)
-        cht.search(id).setDeliveredTime(deliveryTime(sum, newStart).time())
+        pkg.setDeliveredTime(deliveryTime(sum, newStart).time())
+
+        # check if the delivery time is greater than 10:20 and update the package 9 with correct info
         if deliveryTime(sum, newStart).time() >= tenTwenty.time() and cht.search('9').getAddress() == '300 State St':
             cht.search('9').setAddress('410 S State St')
             cht.search('9').setZip('84111')
-            print('It is past 10:20 and package 9 is now updated.')
-        # print('Delivery Time: ' + str(deliveryTime(sum, newStart).time()))
-        # print('Delivered ' + id + ' to ' + address)
-        # print('I have traveled: ' + str(rounded) + ' miles now!\n')
-
-
-        if (leaveOut == True) and truck.getCountOfPackages() == 0:
-            print('That was my final package and I am staying out.')
-            print('I have traveled ' + str(round(truck.getMilesTraveled(), 1)) + ' miles.')
-            print('\n')
-        elif (leaveOut != True) and truck.getCountOfPackages() == 0:
+        # check if truckDeliverPackages was called with leaveOut as True and if so don't return to the hub
+        # otherwise return to the hub and set the reload time as the time you return
+        if (leaveOut != True) and truck.getCountOfPackages() == 0:
             homeDist = distanceBetween(prevAddress, hubAddress)
             truck.setMilesTraveled(float(homeDist) + sum)
             reloadTime = deliveryTime(truck.getMilesTraveled(), newStart)
-            # print("I've returned to the hub to pickup more packages.")
-            # print('After returning to the hub I have traveled ' + str(round(truck.getMilesTraveled(), 1)) + ' miles and the time is currently ' + str(reloadTime.time()) + '.')
-            # print('\n')
 
+# Rounding of the truck sums and printing the sum for each
+#
+# O(1) time complexity
+# O(1) space complexity
 def grabTotalMileage():
     sum1 = round(truckOne.getMilesTraveled(), 1)
     sum2 = round(truckTwo.getMilesTraveled(), 1)
@@ -189,6 +217,10 @@ def grabTotalMileage():
     print('Total mileage driven was ' + str(total) + ' miles.')
     time.sleep(4)
 
+# Concise function to deliver all trucks and print such
+#
+# O(n^2) time complexity
+# O(n^2) space complexity
 def deliver():
     try:
         truckDeliverPackages(truckOne, False, False)
@@ -200,6 +232,10 @@ def deliver():
         print(e)
         print('There was a problem in delivery.')
 
+# Function that takes a time input as a string and queries all packages at that time to see information
+#
+# O(n) time complexity
+# O(n) space complexity
 def displayByTime(timeString):
     fixed_time = datetime.datetime.strptime(timeString, '%I:%M:%S').time()
     tenTwenty = datetime.datetime(100, 1, 1, 10, 19, 59, 0).time()
@@ -211,15 +247,15 @@ def displayByTime(timeString):
         cht.search('9').setZip('84103')
 
 
-    print('ID-------Address-------------------------------City---------------------------------------Zip---------Required-------------------------Weight---------------------------------------Status-------------------')
+    print('ID-------Address-------------------------------City---------------------------------------Zip---------Required-------------------------Weight------------------------------------------Status-------------------')
     for i in Package._registry:
         status = 'Not Delivered Yet'
 
         if fixed_time > i.getDeliveredTime():
-            status = 'Delivered'
+            status = 'Delivered at ' + str(i.getDeliveredTime())
 
 
-        print((str(i.getId()) + '    ' + str(i.getAddress()) + '\t' + str(i.getCity()) + '                ' + str(i.getZip()) + '       ' + str(i.getDeliveryTime()) + '\t' + str(i.getWeight()) + '\t' + status).expandtabs(45))
+        print((str(i.getId()) + '    ' + str(i.getAddress()) + '\t' + str(i.getCity()) + '\t' + str(i.getZip()) + '       ' + str(i.getDeliveryTime()) + '\t' + str(i.getWeight()) + '\t' + status).expandtabs(45))
         print('-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
         #line = str(i.getId()) + '\t' + str(i.getAddress()) + '\t' + str(i.getCity()) + '\t' + str(i.getZip()) + '\t' + str(i.getDeliveryTime()) + '\t' + str(i.getWeight())
 
@@ -227,20 +263,27 @@ def displayByTime(timeString):
 
 
 
-
+#Initializing a few lists, relevant truck objects, hashtable instance, and time values that need to be global.
+#
+# time and space complexity of O(n)
 addressList = addressReader()
 distanceList = distanceReader()
 truckOne = truck()
 truckTwo = truck()
 truckThree = truck()
+cht = HashTable()
+startTime = datetime.datetime(100, 1, 1, 8, 0, 0)
+reloadTime = None
 
+# Main function to operate program
+#
+# Whole program operates at O(n^2) with space complexity of O(n^2)
 if __name__ == '__main__':
+    # Startup the reader to input package data into the hashtable
     packageReader()
-    addressReader()
-    # truckLoadPackages()
-    # deliver()
-    # displayByTime('9:18:00')
 
+
+    # Loop user input for menu items and function calls.
     isExit = True
     while (isExit):
         time.sleep(1)
