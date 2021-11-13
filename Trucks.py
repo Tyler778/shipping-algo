@@ -1,9 +1,8 @@
-from Package import Package
-#from main import addressList
-import datetime
 
 
+# Class truck holds info such as packages, specific addresses to be delivered, as well as the count of current packages.
 class truck:
+    # Constructor
     def __init__(self):
         self.packages = []
         self.addressVisited = []
@@ -11,6 +10,11 @@ class truck:
         self.count = 0
         self.milesTraveled = None
 
+
+
+    # Method called to load package object into packages[] as well as increment the count.
+    #
+    # Time and space complexity of O(1)
     def load(self, package):
         self.allAddresses.append(package.getAddress())
         if self.count < 16:
@@ -22,7 +26,9 @@ class truck:
         if (package.getAddress() not in self.addressVisited):
             self.addressVisited.append(package.getAddress())
 
-
+    #Getters and setters for attributes within the Truck class
+    #
+    # No complexity higher than O(1)
     def printPackageIDs(self):
         for i in self.packages:
             print(i.getId())
@@ -33,7 +39,6 @@ class truck:
         return self.allAddresses
     def getAllPackages(self):
         return self.packages
-
     def getCountOfPackages(self):
         return self.count
     def getStops(self):

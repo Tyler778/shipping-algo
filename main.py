@@ -2,7 +2,7 @@
 #       Student ID: #001041325
 #       DSAII Nearest Neighbor Algorithm
 #       Time Complexity of O(n^2)
-#       Space Complexity of O(n^2)
+#       Space Complexity of O(n)
 #
 import csv
 from hash import HashTable
@@ -154,7 +154,7 @@ def truckLoadPackages():
 # within the truck, deliver it, update the package as delivered with time, and increment the sum of mileage
 #
 # O(n^2) time complexity
-# O(n^2) space complexity
+# O(n) space complexity
 def truckDeliverPackages(truck, leaveOut, newStart):
     global reloadTime
     hubAddress = addressList[0]
@@ -220,7 +220,7 @@ def grabTotalMileage():
 # Concise function to deliver all trucks and print such
 #
 # O(n^2) time complexity
-# O(n^2) space complexity
+# O(n) space complexity
 def deliver():
     try:
         truckDeliverPackages(truckOne, False, False)
@@ -262,6 +262,17 @@ def displayByTime(timeString):
         #print(line)
 
 
+# Function to display specific package information based upon the id passed to it.
+#
+# O(1) time complexity
+# O(1) space complexity
+def lookupPackage(id):
+    pkg = cht.search(id)
+    print('Searching...')
+    time.sleep(1)
+    print('ID-------Address-------------------------------City---------------------------------------Zip-------Required---------------------------Weight------------------------------------------Status-------------------')
+    print(((str(pkg.getId()) + '      ' + str(pkg.getAddress()) + '\t' + str(pkg.getCity()) + '\t' + str(pkg.getZip()) + '      ' + str(pkg.getDeliveryTime()) + '\t' + str(pkg.getWeight()) + '\t' + str(pkg.getStatus()))).expandtabs(45))
+    time.sleep(3)
 
 #Initializing a few lists, relevant truck objects, hashtable instance, and time values that need to be global.
 #
@@ -292,8 +303,9 @@ if __name__ == '__main__':
         print("2. Deliver Packages")
         print('3. Total Mileage Info')
         print('4. Time Search')
-        print('5. Close')
-        option = input("Option 1 must be done before 2.  3 and 4 can then be done.  5 to close program: ")
+        print('5. Package Lookup')
+        print('6. Close')
+        option = input("Option 1 must be done before 2.  3, 4, and 5 can then be done.  6 to close program: ")
         if option == "1":
             truckLoadPackages()
         elif option == "2":
@@ -303,8 +315,10 @@ if __name__ == '__main__':
         elif option == "4":
             t = input("Type any time to view list of package data at that time.  (Example: 9:30:00)")
             displayByTime(str(t))
-
-        elif option == "5":
+        elif option == '5':
+            t = input("Type any ID to see detailed information about that package. (Example: 7)")
+            lookupPackage(str(t))
+        elif option == "6":
             isExit = False
         else:
             print("Wrong option, please try again!")
