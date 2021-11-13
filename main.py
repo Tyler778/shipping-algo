@@ -53,6 +53,7 @@ def packageReader():
         cht.insert(pkg.getId(), pkg)
         x += 1
 
+#function to take two addresses and find distance between both using distanceList created by address reader
 def distanceBetween(address1, address2):
     index1 = addressList.index(address1)
     index2 = addressList.index(address2)
@@ -132,6 +133,7 @@ def truckLoadPackages():
     print('All trucks loaded..')
     return len(t1), len(t2), len(t3)
 
+
 def truckDeliverPackages(truck, leaveOut, newStart):
     global reloadTime
     hubAddress = addressList[0]
@@ -155,16 +157,16 @@ def truckDeliverPackages(truck, leaveOut, newStart):
         if deliveryTime(sum, newStart).time() >= tenTwenty.time() and cht.search('9').getAddress() == '300 State St':
             cht.search('9').setAddress('410 S State St')
             cht.search('9').setZip('84111')
-        #     print('It is past 10:20 and package 9 is now updated.')
+            print('It is past 10:20 and package 9 is now updated.')
         # print('Delivery Time: ' + str(deliveryTime(sum, newStart).time()))
         # print('Delivered ' + id + ' to ' + address)
         # print('I have traveled: ' + str(rounded) + ' miles now!\n')
 
 
-        # if (leaveOut == True) and truck.getCountOfPackages() == 0:
-        #     print('That was my final package and I am staying out.')
-        #     print('I have traveled ' + str(round(truck.getMilesTraveled(), 1)) + ' miles.')
-        #     print('\n')
+        if (leaveOut == True) and truck.getCountOfPackages() == 0:
+            print('That was my final package and I am staying out.')
+            print('I have traveled ' + str(round(truck.getMilesTraveled(), 1)) + ' miles.')
+            print('\n')
         elif (leaveOut != True) and truck.getCountOfPackages() == 0:
             homeDist = distanceBetween(prevAddress, hubAddress)
             truck.setMilesTraveled(float(homeDist) + sum)
@@ -212,10 +214,12 @@ def displayByTime(timeString):
     print('ID-------Address-------------------------------City---------------------------------------Zip---------Required-------------------------Weight---------------------------------------Status-------------------')
     for i in Package._registry:
         status = 'Not Delivered Yet'
+
         if fixed_time > i.getDeliveredTime():
             status = 'Delivered'
 
-        print((str(i.getId()) + '    ' + str(i.getAddress()) + '\t' + str(i.getCity()) + '\t' + str(i.getZip()) + '       ' + str(i.getDeliveryTime()) + '\t' + str(i.getWeight()) + '\t' + status).expandtabs(45))
+
+        print((str(i.getId()) + '    ' + str(i.getAddress()) + '\t' + str(i.getCity()) + '                ' + str(i.getZip()) + '       ' + str(i.getDeliveryTime()) + '\t' + str(i.getWeight()) + '\t' + status).expandtabs(45))
         print('-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
         #line = str(i.getId()) + '\t' + str(i.getAddress()) + '\t' + str(i.getCity()) + '\t' + str(i.getZip()) + '\t' + str(i.getDeliveryTime()) + '\t' + str(i.getWeight())
 
@@ -261,3 +265,4 @@ if __name__ == '__main__':
             isExit = False
         else:
             print("Wrong option, please try again!")
+
